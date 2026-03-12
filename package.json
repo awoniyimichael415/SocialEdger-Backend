@@ -1,0 +1,25 @@
+{
+  "name": "socialedger-backend",
+  "version": "1.0.0",
+  "description": "SocialEdger Reputation Backend Engine",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "web3",
+    "reputation",
+    "blockchain",
+    "socialedger"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "ethers": "^6.16.0",
+    "express": "^4.19.2"
+  }
+}
