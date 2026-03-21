@@ -12,7 +12,7 @@ Load Membership NFT ABI
 */
 const membershipAbiPath = path.resolve(
   __dirname,
-  "../../frontend/src/abi/MembershipNFT.json"
+  "../abi/MembershipNFT.json"
 );
 
 const membershipAbiFile = JSON.parse(
@@ -26,7 +26,7 @@ Load Token ABI
 */
 const tokenAbiPath = path.resolve(
   __dirname,
-  "../../frontend/src/abi/PresaleToken.json"
+  "../abi/PresaleToken.json"
 );
 
 const tokenAbiFile = JSON.parse(
