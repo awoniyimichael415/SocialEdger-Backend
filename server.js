@@ -10,6 +10,8 @@ import kycRoutes from "./kyc/kyc.routes.js";
 import adminRoutes from "./kyc/admin.routes.js";
 import agreementRoutes from "./agreement/agreement.routes.js";
 import miningRoutes from "./mining/mining.routes.js";
+import postRoutes from "./routes/post.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
 
 const app = express();
 
@@ -23,6 +25,9 @@ app.use("/api/kyc", kycRoutes);
 app.use("/api/admin/kyc", adminRoutes);
 app.use("/api/agreement", agreementRoutes);
 app.use("/api/mining", miningRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/upload", uploadRoutes);
+
 
 /*
 START SERVER
