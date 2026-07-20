@@ -113,34 +113,24 @@ GET CONTRIBUTOR BY USERNAME
 ==================================================
 */
 
-router.get(
-  "/:username",
-  async (req, res) => {
+router.get("/:username", async (req, res) => {
+  try {
+    console.log("Requested username:", req.params.username);
 
-    try {
+    const contributor = await Contributor.findOne({
+      username: req.params.username,
+    });
 
-      const contributor =
-        await Contributor.findOne({
+    console.log("Found contributor:", contributor);
 
-          username:
-            req.params.username,
-
-        });
-
-      res.json(contributor);
-
-    } catch (error) {
-
-      res.status(500).json({
-
-        error: error.message,
-
-      });
-
-    }
-
+    res.json(contributor);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: error.message,
+    });
   }
-);
+});
 
 /*
 ==================================================
