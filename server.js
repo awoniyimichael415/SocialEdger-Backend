@@ -19,7 +19,7 @@ import rewardRoutes from "./rewards/reward.routes.js";
 import presaleRoutes from "./presale/presale.routes.js";
 import daoRoutes from "./dao/dao.routes.js";
 import reputationRoutes from "./reputation/reputation.routes.js";
-
+import membershipRoutes from "./membership/membership.routes.js";
 
 const app = express();
 
@@ -46,6 +46,7 @@ app.use("/api/rewards", rewardRoutes);
 app.use("/api/presale", presaleRoutes);
 app.use("/api/dao", daoRoutes);
 app.use("/api/reputation", reputationRoutes);
+app.use("/api/membership", membershipRoutes);
 
 /*
 START SERVER
