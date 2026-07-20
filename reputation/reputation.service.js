@@ -1,81 +1,179 @@
-import { ethers } from "ethers";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { membershipScore } from "./membership.score.js";
+import { contributorScore } from "./contributor.score.js";
+import { opportunityScore } from "./opportunity.score.js";
+import { rewardScore } from "./reward.score.js";
+import { calculateLevel } from "./level.service.js";
+import { calculateBadges } from "./badge.service.js";
+import { buildReputationHistory } from "./history.service.js";
 
-/*
-Resolve current directory for ES modules
-*/
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+export async function getReputationScore(wallet) {
 
-/*
-Load ABI from backend folder
-*/
-const abiPath = path.resolve(
-  __dirname,
-  "../abi/MembershipNFT.json"
-);
+  /*
+  =====================================
+  MEMBERSHIP
+  =====================================
+  */
 
-const abiFile = JSON.parse(
-  fs.readFileSync(abiPath, "utf8")
-);
+  const membership =
+    await membershipScore(wallet);
 
-const ABI = abiFile.abi;
+  /*
+  =====================================
+  CONTRIBUTOR
+  =====================================
+  */
 
-/*
-Use Sepolia RPC from environment variables
-*/
-const RPC = process.env.RPC_URL;
+  const contributor =
+    await contributorScore(wallet);
 
-/*
-Create provider
-*/
-const provider = new ethers.JsonRpcProvider(RPC);
+  /*
+  =====================================
+  OPPORTUNITIES
+  =====================================
+  */
 
-/*
-Membership NFT Contract Address
-*/
-const CONTRACT_ADDRESS = "0xe4353D2092B6bEbf7737227e405Ac7CcD3B212bD";
+  const opportunities =
+    await opportunityScore(
+      contributor.contributor
+    );
 
-/*
-Create contract instance
-*/
-const contract = new ethers.Contract(
-  CONTRACT_ADDRESS,
-  ABI,
-  provider
-);
+  /*
+  =====================================
+  REWARDS
+  =====================================
+  */
 
-export const getReputationScore = async (wallet) => {
+  const rewards =
+    await rewardScore(
+      contributor.contributor
+    );
 
-  let score = 0;
-  let role = "User";
+  /*
+  =====================================
+  TOTAL REPUTATION
+  =====================================
+  */
 
-  try {
+  const totalReputation =
+    membership.score +
+    contributor.score +
+    opportunities.score +
+    rewards.score;
 
-    const isPrimary = await contract.isPrimary(wallet);
-    const isSecondary = await contract.isSecondary(wallet);
+  /*
+  =====================================
+  LEVEL
+  =====================================
+  */
 
-    if (isPrimary) {
-      score += 100;
-      role = "Primary Member";
-    }
+  const level =
+    calculateLevel(totalReputation);
 
-    if (isSecondary) {
-      score += 50;
-      role = "Secondary Member";
-    }
+  /*
+  =====================================
+  BADGES
+  =====================================
+  */
 
-  } catch (error) {
+  const badges =
+    calculateBadges(
+      contributor.contributor,
+      totalReputation
+    );
 
-    console.error("Blockchain read error:", error);
+  /*
+  =====================================
+  HISTORY
+  =====================================
+  */
+
+  const history =
+    buildReputationHistory(
+      membership,
+      contributor,
+      opportunities,
+      rewards
+    );
+
+  /*
+  =====================================
+  UPDATE CONTRIBUTOR CACHE
+  =====================================
+  */
+
+  if (contributor.contributor) {
+
+    contributor.contributor.totalReputation =
+      totalReputation;
+
+    contributor.contributor.contributorLevel =
+      level.level;
+
+    contributor.contributor.badges =
+      badges.map(
+        (badge) => badge.name
+      );
+
+    contributor.contributor.daoVotingWeight =
+      Math.max(
+        1,
+        Math.floor(
+          totalReputation / 100
+        )
+      );
+
+    await contributor.contributor.save();
 
   }
 
+  /*
+  =====================================
+  RESPONSE
+  =====================================
+  */
+
   return {
+
     wallet,
-    reputation: score,
-    role,
+
+    role: membership.role,
+
+    membership,
+
+    totalReputation,
+
+    level,
+
+    badges,
+
+    history,
+
+    contributor:
+      contributor.contributor,
+
+    profileCompletion:
+      contributor.profileCompletion,
+
+    daoVotingWeight:
+      contributor.contributor
+        ?.daoVotingWeight || 1,
+
+    breakdown: {
+
+      membership:
+        membership.score,
+
+      contributor:
+        contributor.score,
+
+      opportunities:
+        opportunities.score,
+
+      rewards:
+        rewards.score,
+
+    },
+
   };
-};
+
+}
