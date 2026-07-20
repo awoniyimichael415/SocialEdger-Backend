@@ -22,9 +22,13 @@ GET CONTRIBUTOR
 =========================================
 */
 
-export async function getContributor(id) {
+export async function getContributor(username) {
 
-  return await Contributor.findById(id);
+  return await Contributor.findOne({
+
+    username: username,
+
+  });
 
 }
 
